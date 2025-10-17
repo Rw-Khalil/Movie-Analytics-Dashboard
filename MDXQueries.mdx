@@ -1,0 +1,72 @@
+---Top 10 Movies by IMDB Rating
+SELECT 
+  {[Measures].[IMDB Rating]} ON COLUMNS,
+  TOPCOUNT([Movie Dim].[Id].MEMBERS, 10, [Measures].[IMDB Rating]) ON ROWS
+FROM [Movies2Cube];
+
+---Top 5 Movies with Highest Budget
+SELECT 
+  {[Measures].[Budget]} ON COLUMNS,
+  TOPCOUNT([Movie Dim].[Id].MEMBERS, 5, [Measures].[Budget]) ON ROWS
+FROM [Movies2Cube];
+
+---Movies with High Popularity but Low Vote Count
+WITH 
+  MEMBER [Measures].[PopVoteRatio] AS
+    IIF([Measures].[Vote Count] = 0, NULL, [Measures].[Popularity] / [Measures].[Vote Count])
+SELECT 
+  {[Measures].[PopVoteRatio]} ON COLUMNS,
+  TOPCOUNT([Movie Dim].[Id].MEMBERS, 10, [Measures].[PopVoteRatio]) ON ROWS
+FROM [Movies2Cube];
+
+---Compare Budget vs Revenue for Top Movies
+SELECT 
+  {[Measures].[Budget], [Measures].[Revenue]} ON COLUMNS,
+  TOPCOUNT([Movie Dim].[Id].MEMBERS, 10, [Measures].[Revenue]) ON ROWS
+FROM [Movies2Cube];
+
+---Top 5 People with Highest Average Rating (Director/Actor/etc.)
+SELECT 
+  {[Measures].[Average Rating]} ON COLUMNS,
+  TOPCOUNT([People Dim].[Id].MEMBERS, 5, [Measures].[Average Rating]) ON ROWS
+FROM [Movies2Cube];
+
+---Total Revenue by Production Company
+SELECT 
+  {[Measures].[Revenue]} ON COLUMNS,
+  ORDER([Production Dim].[Id].MEMBERS, [Measures].[Revenue], DESC) ON ROWS
+FROM [Movies2Cube];
+
+---Top 5 Most Popular Movies
+SELECT 
+  {[Measures].[Popularity]} ON COLUMNS,
+  TOPCOUNT([Movie Dim].[Id].MEMBERS, 5, [Measures].[Popularity]) ON ROWS
+FROM [Movies2Cube];
+
+---Movies with Highest Difference Between Budget and Revenue
+WITH 
+  MEMBER [Measures].[Profit] AS
+    [Measures].[Revenue] - [Measures].[Budget]
+SELECT 
+  {[Measures].[Profit]} ON COLUMNS,
+  TOPCOUNT([Movie Dim].[Id].MEMBERS, 10, [Measures].[Profit]) ON ROWS
+FROM [Movies2Cube];
+
+---Movies with High Budget but Low Revenue (Box Office Failures)
+WITH 
+  MEMBER [Measures].[FailureScore] AS
+    IIF([Measures].[Budget] > [Measures].[Revenue], [Measures].[Budget] - [Measures].[Revenue], NULL)
+SELECT 
+  {[Measures].[FailureScore]} ON COLUMNS,
+  TOPCOUNT([Movie Dim].[Id].MEMBERS, 10, [Measures].[FailureScore]) ON ROWS
+FROM [Movies2Cube];
+
+--Compare Popularity and Revenue for Movies
+SELECT 
+  { 
+    [Measures].[Popularity], 
+    [Measures].[Revenue] 
+  } ON COLUMNS,
+  [Movie Dim].[Id].MEMBERS ON ROWS
+FROM [Movies2Cube];
+
